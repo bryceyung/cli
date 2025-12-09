@@ -92,13 +92,20 @@ class KeyValueArgType:
                 # Starting first, longest separator found.
                 sep = found[min(found.keys())]
 
-                key, value = token.split(sep, 1)
+                key_part, value_part = token.split(sep, 1)
 
-                # Any preceding tokens are part of the key.
-                key = ''.join(tokens[:i]) + key
+                # The key is composed of:
+                # 1. Any preceding tokens (unescaped by str(t) in join)
+                # 2. The key part of the current token (re-tokenize to
+                #    handle internal escapes correctly)
+                key_tokens = tokens[:i] + self.tokenize(key_part)
+                key = ''.join(str(t) for t in key_tokens)
 
-                # Any following tokens are part of the value.
-                value += ''.join(tokens[i + 1:])
+                # The value is composed of:
+                # 1. The value part of the current token (re-tokenize)
+                # 2. Any succeeding tokens (unescaped by str(t) in join)
+                value_tokens = self.tokenize(value_part) + tokens[i + 1:]
+                value = ''.join(str(t) for t in value_tokens)
 
                 break
 
