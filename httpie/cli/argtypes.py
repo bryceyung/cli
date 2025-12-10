@@ -95,16 +95,17 @@ class KeyValueArgType:
                 key_part, value_part = token.split(sep, 1)
 
                 # The key is composed of:
-                # 1. Any preceding tokens (unescaped by str(t) in join)
-                # 2. The key part of the current token (re-tokenize to
-                #    handle internal escapes correctly)
-                key_tokens = tokens[:i] + self.tokenize(key_part)
+                # 1. Any preceding tokens (already Escaped or regular strings)
+                # 2. The key part of the current token (re-tokenize to catch internal escapes)
+                key_tokens = tokens[:i]
+                key_tokens.extend(self.tokenize(key_part))
                 key = ''.join(str(t) for t in key_tokens)
 
                 # The value is composed of:
-                # 1. The value part of the current token (re-tokenize)
-                # 2. Any succeeding tokens (unescaped by str(t) in join)
-                value_tokens = self.tokenize(value_part) + tokens[i + 1:]
+                # 1. The value part of the current token (re-tokenize to catch internal escapes)
+                # 2. Any succeeding tokens
+                value_tokens = self.tokenize(value_part)
+                value_tokens.extend(tokens[i + 1:])
                 value = ''.join(str(t) for t in value_tokens)
 
                 break
